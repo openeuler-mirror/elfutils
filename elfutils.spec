@@ -1,7 +1,7 @@
 # -*- rpm-spec from http://elfutils.org/ -*-
 Name: elfutils
 Version: 0.177
-Release: 2
+Release: 3
 Summary: A collection of utilities and DSOs to handle ELF files and DWARF data
 URL: http://elfutils.org/
 License: GPLv3+ and (GPLv2+ or LGPLv3+)
@@ -86,7 +86,8 @@ rm -rf ${RPM_BUILD_ROOT}
 
 %files
 %defattr(-,root,root)
-%doc COPYING COPYING-GPLV2 COPYING-LGPLV3 README TODO CONTRIBUTING
+%license COPYING COPYING-GPLV2 COPYING-LGPLV3
+%doc README TODO CONTRIBUTING
 %{_bindir}/eu-addr2line
 %{_bindir}/eu-ar
 %{_bindir}/eu-elfclassify
@@ -141,6 +142,12 @@ rm -rf ${RPM_BUILD_ROOT}
 %{_libdir}/pkgconfig/libelf.pc
 
 %changelog
+* Thu Oct 10 2019 Yalong Guan <guanyalong@huawei.com> - 0.177-3
+- Type: Reorganization
+- ID:NA
+- SUG:NA
+- DESC: move license files to license folder.
+
 * Mon Sep 9 2019 Yalong Guan <guanyalong@huawei.com> - 0.177-2
 - Type: Reorganization
 - ID:NA
