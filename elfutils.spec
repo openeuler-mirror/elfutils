@@ -1,7 +1,7 @@
 # -*- rpm-spec from http://elfutils.org/ -*-
 Name: elfutils
-Version: 0.177
-Release: 3
+Version: 0.179
+Release: 1
 Summary: A collection of utilities and DSOs to handle ELF files and DWARF data
 URL: http://elfutils.org/
 License: GPLv3+ and (GPLv2+ or LGPLv3+)
@@ -12,6 +12,12 @@ Requires: glibc >= 2.7 libstdc++
 
 BuildRoot: %{_tmppath}/%{name}-root
 BuildRequires: gcc >= 4.1.2-33 m4 zlib-devel gdb-headless
+
+# For debuginfod
+BuildRequires: pkgconfig(libmicrohttpd) >= 0.9.33
+BuildRequires: pkgconfig(libcurl) >= 7.29.0
+BuildRequires: pkgconfig(sqlite3) >= 3.7.17
+BuildRequires: pkgconfig(libarchive) >= 3.1.2
 
 %define _gnu %{nil}
 %define _programprefix eu-
@@ -53,6 +59,48 @@ assembler interface. libelf allows you to
 access the internals of the ELF object file format, so you can see the
 different sections of an ELF file.
 
+%package help
+Summary: Help documents for elfutils
+
+%description help
+This package contains help documents for eltutils
+
+%package debuginfod-client
+Summary: Library and command line client for build-id HTTP ELF/DWARF server
+License: GPLv3+ and (GPLv2+ or LGPLv3+)
+
+%package debuginfod-client-devel
+Summary: Libraries and headers to build debuginfod client applications
+License: GPLv2+ or LGPLv3+
+
+%package debuginfod
+Summary: HTTP ELF/DWARF file server addressed by build-id
+License: GPLv3+
+BuildRequires: systemd
+Requires(post):   systemd
+Requires(preun):  systemd
+Requires(postun): systemd
+Requires(pre): shadow-utils
+# To extract .dep files with a bsdtar (=libarchive) subshell
+Requires: bsdtar
+
+%description debuginfod-client
+The elfutils-debuginfod-client package contains shared libraries
+dynamically loaded from -ldw, which use a debuginfod service
+to look up debuginfo and associated data. Also includes a
+command-line frontend.
+
+%description debuginfod-client-devel
+The elfutils-debuginfod-client-devel package contains the libraries
+to create applications to use the debuginfod service.
+
+%description debuginfod
+The elfutils-debuginfod package contains the debuginfod binary
+and control files for a service that can provide ELF/DWARF
+files to remote clients, based on build-id identification.
+The ELF/DWARF file searching functions in libdwfl can query
+such servers to download those files on demand.
+
 %prep
 %setup -q
 
@@ -66,9 +114,12 @@ mkdir -p ${RPM_BUILD_ROOT}%{_prefix}
 
 %make_install
 chmod +x ${RPM_BUILD_ROOT}%{_prefix}/%{_lib}/lib*.so*
-chmod +x ${RPM_BUILD_ROOT}%{_prefix}/%{_lib}/elfutils/lib*.so*
 
 install -Dm0644 config/10-default-yama-scope.conf ${RPM_BUILD_ROOT}%{_sysctldir}/10-default-yama-scope.conf
+install -Dm0644 config/debuginfod.service ${RPM_BUILD_ROOT}%{_unitdir}/debuginfod.service
+install -Dm0644 config/debuginfod.sysconfig ${RPM_BUILD_ROOT}%{_sysconfdir}/sysconfig/debuginfod
+mkdir -p ${RPM_BUILD_ROOT}%{_localstatedir}/cache/debuginfod
+touch ${RPM_BUILD_ROOT}%{_localstatedir}/cache/debuginfod/debuginfod.sqlite
 
 %check
 make  -s %{?_smp_mflags} check
@@ -111,8 +162,6 @@ rm -rf ${RPM_BUILD_ROOT}
 %{_libdir}/libdw.so.*
 %{_libdir}/libelf-%{version}.so
 %{_libdir}/libelf.so.*
-%dir %{_libdir}/elfutils
-%{_libdir}/elfutils/lib*.so
 %{_datadir}/locale/*/LC_MESSAGES/elfutils.mo
 %{_sysctldir}/10-default-yama-scope.conf
 
@@ -126,7 +175,6 @@ rm -rf ${RPM_BUILD_ROOT}
 %{_includedir}/elfutils/libdw.h
 %{_includedir}/elfutils/libdwelf.h
 %{_includedir}/elfutils/libdwfl.h
-%{_includedir}/elfutils/libebl.h
 %{_includedir}/elfutils/version.h
 %{_includedir}/gelf.h
 %{_includedir}/libelf.h
@@ -135,13 +183,56 @@ rm -rf ${RPM_BUILD_ROOT}
 %{_libdir}/libasm.so
 %{_libdir}/libdw.a
 %{_libdir}/libdw.so
-%{_libdir}/libebl.a
 %{_libdir}/libelf.a
 %{_libdir}/libelf.so
 %{_libdir}/pkgconfig/libdw.pc
 %{_libdir}/pkgconfig/libelf.pc
 
+%files help
+%{_mandir}/man1/eu-*.1*
+%{_mandir}/man1/debuginfod-find.1*
+%{_mandir}/man3/debuginfod_*.3*
+%{_mandir}/man3/elf_*.3*
+%{_mandir}/man8/debuginfod.8*
+
+%files debuginfod-client
+%defattr(-,root,root)
+%{_libdir}/libdebuginfod-%{version}.so
+%{_bindir}/debuginfod-find
+
+%files debuginfod-client-devel
+%defattr(-,root,root)
+%{_libdir}/pkgconfig/libdebuginfod.pc
+%{_includedir}/elfutils/debuginfod.h
+%{_libdir}/libdebuginfod.so*
+
+%files debuginfod
+%defattr(-,root,root)
+%{_bindir}/debuginfod
+%config(noreplace) %verify(not md5 size mtime) %{_sysconfdir}/sysconfig/debuginfod
+%{_unitdir}/debuginfod.service
+%{_sysconfdir}/sysconfig/debuginfod
+
+%dir %attr(0700,debuginfod,debuginfod) %{_localstatedir}/cache/debuginfod
+%verify(not md5 size mtime) %attr(0600,debuginfod,debuginfod) %{_localstatedir}/cache/debuginfod/debuginfod.sqlite
+
+%pre debuginfod
+getent group debuginfod >/dev/null || groupadd -r debuginfod
+getent passwd debuginfod >/dev/null || \
+  useradd -r -g debuginfod -d /var/cache/debuginfod -s /sbin/nologin \
+          -c "elfutils debuginfo server" debuginfod
+exit 0
+
+%post debuginfod
+%systemd_post debuginfod.service
+
+%postun debuginfod
+%systemd_postun_with_restart debuginfod.service
+
 %changelog
+* Mon May 11 2020 gaihuiying<gaihuiying1@huawei.com> - 0.179-1
+- update to 0.179
+
 * Thu Oct 10 2019 Yalong Guan <guanyalong@huawei.com> - 0.177-3
 - Type: Reorganization
 - ID:NA
