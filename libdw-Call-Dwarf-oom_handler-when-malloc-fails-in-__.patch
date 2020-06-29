@@ -1,0 +1,35 @@
+From 5436c7529dd9b24f62e3df10e30d5da53da16efd Mon Sep 17 00:00:00 2001
+From: Mark Wielaard <mark@klomp.org>
+Date: Sun, 26 Apr 2020 01:41:27 +0200
+Subject: [PATCH 3/5] libdw: Call Dwarf oom_handler() when malloc fails in
+ __libdw_alloc_tail.
+
+GCC10 -fanalyzer found a possibly-NULL dereference after a failed
+malloc in __libdw_alloc_tail. In this case we should call the Dwarf
+oom_handler as is done in other places where an essential malloc
+call fails. The oom_handler cannot return and will likely just abort.
+
+Signed-off-by: Mark Wielaard <mark@klomp.org>
+---
+ libdw/libdw_alloc.c | 5 +++++
+ 1 files changed, 5 insertions(+)
+
+diff --git a/libdw/libdw_alloc.c b/libdw/libdw_alloc.c
+index e0281a3..b3e5334 100644
+--- a/libdw/libdw_alloc.c
++++ b/libdw/libdw_alloc.c
+@@ -87,6 +87,11 @@ __libdw_alloc_tail (Dwarf *dbg)
+   if (result == NULL)
+     {
+       result = malloc (dbg->mem_default_size);
++      if (result == NULL)
++	{
++	  pthread_rwlock_unlock (&dbg->mem_rwl);
++	  dbg->oom_handler();
++	}
+       result->size = dbg->mem_default_size
+                      - offsetof (struct libdw_memblock, mem);
+       result->remaining = result->size;
+-- 
+1.8.3.1
+
