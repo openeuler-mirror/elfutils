@@ -1,0 +1,72 @@
+From 25d40a626d36c140c8bb309f410f25af2836ec9b Mon Sep 17 00:00:00 2001
+From: Mark Wielaard <mark@klomp.org>
+Date: Thu, 16 Apr 2020 15:41:57 +0200
+Subject: [PATCH] libcpu: Replace assert with goto invalid_op for bad prefix.
+
+https://sourceware.org/bugzilla/show_bug.cgi?id=25831
+
+Signed-off-by: Mark Wielaard <mark@klomp.org>
+---
+ libcpu/ChangeLog     |  5 +++++
+ libcpu/i386_disasm.c | 11 +++++++----
+ 2 files changed, 12 insertions(+), 4 deletions(-)
+
+diff --git a/libcpu/ChangeLog b/libcpu/ChangeLog
+index 7079651..a8b2b95 100644
+--- a/libcpu/ChangeLog
++++ b/libcpu/ChangeLog
+@@ -1,3 +1,8 @@
++2020-04-16  Mark Wielaard  <mark@klomp.org>
++
++	* i386_disasm.c (i386_disasm): Replace assert with goto invalid_op
++	for bad prefix.
++
+ 2019-12-11  Omar Sandoval  <osandov@fb.com>
+ 
+ 	* Makefile.am (i386_lex_CFLAGS): Add -Wno-implicit-fallthrough.
+diff --git a/libcpu/i386_disasm.c b/libcpu/i386_disasm.c
+index 4422ffa..32df8cd 100644
+--- a/libcpu/i386_disasm.c
++++ b/libcpu/i386_disasm.c
+@@ -407,7 +407,8 @@ i386_disasm (Ebl *ebl __attribute__((unused)),
+ 
+ 	      ++curr;
+ 
+-	      assert (last_prefix_bit != 0);
++	      if (last_prefix_bit == 0)
++		goto invalid_op;
+ 	      correct_prefix = last_prefix_bit;
+ 	    }
+ 
+@@ -445,8 +446,8 @@ i386_disasm (Ebl *ebl __attribute__((unused)),
+ 	       the input data.  */
+ 	    goto do_ret;
+ 
+-	  assert (correct_prefix == 0
+-		  || (prefixes & correct_prefix) != 0);
++	  if (correct_prefix != 0 && (prefixes & correct_prefix) == 0)
++	    goto invalid_op;
+ 	  prefixes ^= correct_prefix;
+ 
+ 	  if (0)
+@@ -473,7 +474,8 @@ i386_disasm (Ebl *ebl __attribute__((unused)),
+ 
+ 	      if (data == end)
+ 		{
+-		  assert (prefixes != 0);
++		  if (prefixes == 0)
++		    goto invalid_op;
+ 		  goto print_prefix;
+ 		}
+ 
+@@ -1125,6 +1127,7 @@ i386_disasm (Ebl *ebl __attribute__((unused)),
+ 	}
+ 
+       /* Invalid (or at least unhandled) opcode.  */
++    invalid_op:
+       if (prefixes != 0)
+ 	goto print_prefix;
+       /* Make sure we get past the unrecognized opcode if we haven't yet.  */
+-- 
+1.8.3.1
+

@@ -1,0 +1,67 @@
+From 39f28eaf8c821d71d57ffc759655ec4168d0bead Mon Sep 17 00:00:00 2001
+From: Mark Wielaard <mark@klomp.org>
+Date: Thu, 16 Apr 2020 17:45:31 +0200
+Subject: [PATCH 2/2] libdwfl: Initialize bits to NULL in
+ dwfl_standard_find_debuginfo for LTO.
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+GCC10 LTO is too smart (and somewhat cryptic):
+
+    find-debuginfo.c: In function ‘dwfl_standard_find_debuginfo’:
+    debuginfod-client.c:85:8: error: ‘bits’ may be used uninitialized
+    in this function [-Werror=maybe-uninitialized]
+    find-debuginfo.c:360:24: note: ‘bits’ was declared here
+    lto1: all warnings being treated as errors
+
+So it inlines __libdwfl_debuginfod_find_debuginfo into
+dwfl_standard_find_debuginfo and since it cannot see into the
+function pointer (*fp_debuginfod_find_debuginfo), it assumes that
+build_id_bit (== bits in dwfl_standard_find_debuginfo) will be used
+by the called function and it might not be initialized.
+But if you read the code the there is a check for build_id_len > 0
+to see whether bits is or isn't initialized before using bits.
+But gcc isn't smart enough to figure that out.
+
+Maybe that actually should be an heuristic gcc lto should use.
+If the callchain I am inlining is so deep that I cannot figure out
+maybe-uninitialized variables anymore I should stop inlining.
+
+For now just help GCC out and initialize bits to NULL.
+
+Signed-off-by: Mark Wielaard <mark@klomp.org>
+---
+ libdwfl/ChangeLog        | 5 +++++
+ libdwfl/find-debuginfo.c | 2 +-
+ 2 files changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/libdwfl/ChangeLog b/libdwfl/ChangeLog
+index 0b95490..4ddc9ad 100644
+--- a/libdwfl/ChangeLog
++++ b/libdwfl/ChangeLog
+@@ -1,3 +1,8 @@
++2020-04-16  Mark Wielaard  <mark@klomp.org>
++
++	* find-debuginfo.c (dwfl_standard_find_debuginfo): Initialize bits
++	to NULL.
++
+ 2020-01-24  Mark Wielaard  <mark@klomp.org>
+ 
+ 	* linux-kernel-modules.c (find_kernel_elf): Check release isn't NULL.
+diff --git a/libdwfl/find-debuginfo.c b/libdwfl/find-debuginfo.c
+index 4085764..2dd11c4 100644
+--- a/libdwfl/find-debuginfo.c
++++ b/libdwfl/find-debuginfo.c
+@@ -357,7 +357,7 @@ dwfl_standard_find_debuginfo (Dwfl_Module *mod,
+ {
+   /* First try by build ID if we have one.  If that succeeds or fails
+      other than just by finding nothing, that's all we do.  */
+-  const unsigned char *bits;
++  const unsigned char *bits = NULL;
+   GElf_Addr vaddr;
+   int bits_len;
+   if ((bits_len = INTUSE(dwfl_module_build_id) (mod, &bits, &vaddr)) > 0)
+-- 
+1.8.3.1
+
