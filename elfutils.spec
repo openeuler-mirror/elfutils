@@ -1,7 +1,7 @@
 # -*- rpm-spec from http://elfutils.org/ -*-
 Name: elfutils
-Version: 0.177
-Release: 3
+Version: 0.180
+Release: 1
 Summary: A collection of utilities and DSOs to handle ELF files and DWARF data
 URL: http://elfutils.org/
 License: GPLv3+ and (GPLv2+ or LGPLv3+)
@@ -57,7 +57,7 @@ different sections of an ELF file.
 %setup -q
 
 %build
-%configure --program-prefix=%{_programprefix}
+%configure --program-prefix=%{_programprefix} --disable-debuginfod
 make -s %{?_smp_mflags}
 
 %install
@@ -66,7 +66,6 @@ mkdir -p ${RPM_BUILD_ROOT}%{_prefix}
 
 %make_install
 chmod +x ${RPM_BUILD_ROOT}%{_prefix}/%{_lib}/lib*.so*
-chmod +x ${RPM_BUILD_ROOT}%{_prefix}/%{_lib}/elfutils/lib*.so*
 
 install -Dm0644 config/10-default-yama-scope.conf ${RPM_BUILD_ROOT}%{_sysctldir}/10-default-yama-scope.conf
 
@@ -111,9 +110,9 @@ rm -rf ${RPM_BUILD_ROOT}
 %{_libdir}/libdw.so.*
 %{_libdir}/libelf-%{version}.so
 %{_libdir}/libelf.so.*
-%dir %{_libdir}/elfutils
-%{_libdir}/elfutils/lib*.so
 %{_datadir}/locale/*/LC_MESSAGES/elfutils.mo
+%{_datadir}/man/man1/eu-*.gz
+%{_datadir}/man/man3/elf_*.gz
 %{_sysctldir}/10-default-yama-scope.conf
 
 %files devel
@@ -126,7 +125,6 @@ rm -rf ${RPM_BUILD_ROOT}
 %{_includedir}/elfutils/libdw.h
 %{_includedir}/elfutils/libdwelf.h
 %{_includedir}/elfutils/libdwfl.h
-%{_includedir}/elfutils/libebl.h
 %{_includedir}/elfutils/version.h
 %{_includedir}/gelf.h
 %{_includedir}/libelf.h
@@ -135,13 +133,18 @@ rm -rf ${RPM_BUILD_ROOT}
 %{_libdir}/libasm.so
 %{_libdir}/libdw.a
 %{_libdir}/libdw.so
-%{_libdir}/libebl.a
 %{_libdir}/libelf.a
 %{_libdir}/libelf.so
 %{_libdir}/pkgconfig/libdw.pc
 %{_libdir}/pkgconfig/libelf.pc
 
 %changelog
+* Wed Jul 29 2020 yang_zhuang_zhuang <yangzhuangzhuang1@huawei.com> - 0.180-1
+- Type:enhancement
+- ID:NA
+- SUG:NA
+- DESC:update version to 0.180
+
 * Thu Oct 10 2019 Yalong Guan <guanyalong@huawei.com> - 0.177-3
 - Type: Reorganization
 - ID:NA
