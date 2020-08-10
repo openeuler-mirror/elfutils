@@ -1,19 +1,11 @@
 # -*- rpm-spec from http://elfutils.org/ -*-
 Name: elfutils
-Version: 0.179
-Release: 2
+Version: 0.180
+Release: 1
 Summary: A collection of utilities and DSOs to handle ELF files and DWARF data
 URL: http://elfutils.org/
 License: GPLv3+ and (GPLv2+ or LGPLv3+)
 Source: ftp://sourceware.org/pub/elfutils/%{version}/elfutils-%{version}.tar.bz2
-
-Patch0000: libdwfl-Initialize-bits-to-NULL-in-dwfl_standard_fin.patch
-Patch0001: libcpu-Replace-assert-with-goto-invalid_op-for-bad-p.patch
-Patch0002: libelf-Fix-double-free-in-__libelf_compress-on-error.patch
-Patch0003: libasm-Fix-double-fclose-in-asm_end.patch
-Patch0004: libdw-Call-Dwarf-oom_handler-when-malloc-fails-in-__.patch
-Patch0005: libdwfl-Fix-double-free-on-failure-path-in-gzip.c.patch
-Patch0006: libdwfl-Handle-debugaltlink-in-dwfl_standard_find_de.patch
 
 Provides:  elfutils-libelf elfutils-default-yama-scope default-yama-scope elfutils-libs
 Obsoletes: elfutils-libelf elfutils-default-yama-scope elfutils-libs
@@ -112,13 +104,6 @@ such servers to download those files on demand.
 
 %prep
 %setup -q
-%patch0000 -p1
-%patch0001 -p1
-%patch0002 -p1
-%patch0003 -p1
-%patch0004 -p1
-%patch0005 -p1
-%patch0006 -p1
 
 %build
 %configure --program-prefix=%{_programprefix}
@@ -246,6 +231,9 @@ exit 0
 %systemd_postun_with_restart debuginfod.service
 
 %changelog
+* Thu Aug 6 2020 zhangguangzhi<zhangguangzhi3@huawei.com> - 0.180-1
+- update to 0.180
+
 * Mon Jun 29 2020 gengqihu<gengqihu1@huawei.com> - 0.179-2
 - quality enhancement synchronization git patch
 
