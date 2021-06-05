@@ -1,7 +1,7 @@
 # -*- rpm-spec from http://elfutils.org/ -*-
 Name: elfutils
 Version: 0.182
-Release: 1
+Release: 2
 Summary: A collection of utilities and DSOs to handle ELF files and DWARF data
 URL: http://elfutils.org/
 License: GPLv3+ and (GPLv2+ or LGPLv3+)
@@ -11,7 +11,7 @@ Obsoletes: elfutils-libelf elfutils-default-yama-scope elfutils-libs
 Requires: glibc >= 2.7 libstdc++
 
 BuildRoot: %{_tmppath}/%{name}-root
-BuildRequires: gcc >= 4.1.2-33 m4 zlib-devel gdb-headless
+BuildRequires: gcc >= 4.1.2-33 m4 zlib-devel gdb-headless gcc-c++
 
 #for debuginfod
 BuildRequires: pkgconfig(libmicrohttpd) >= 0.9.33
@@ -233,6 +233,12 @@ exit 0
 %systemd_postun_with_restart debuginfod.service
 
 %changelog
+* Sat Jun 5 2021 wangchen <wangchen137@huawei.com> - 0.182-2
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC:add gcc-c++ to BuildRequires
+
 * Tue Jan 26 2021 yang_zhuang_zhuang <yangzhuangzhuang1@huawei.com> - 0.182-1
 - Type:enhancement
 - ID:NA
