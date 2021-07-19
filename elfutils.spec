@@ -1,7 +1,7 @@
 # -*- rpm-spec from http://elfutils.org/ -*-
 Name: elfutils
-Version: 0.182
-Release: 2
+Version: 0.185
+Release: 1
 Summary: A collection of utilities and DSOs to handle ELF files and DWARF data
 URL: http://elfutils.org/
 License: GPLv3+ and (GPLv2+ or LGPLv3+)
@@ -233,6 +233,9 @@ exit 0
 %systemd_postun_with_restart debuginfod.service
 
 %changelog
+* Mon Jul 19 2021 panxiaohe <panxiaohe@huawei.com> - 0.185-1
+- DESC: Update version to 0.185
+
 * Sat Jun 5 2021 wangchen <wangchen137@huawei.com> - 0.182-2
 - Type:bugfix
 - ID:NA
