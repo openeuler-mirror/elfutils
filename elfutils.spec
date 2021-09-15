@@ -1,13 +1,14 @@
 # -*- rpm-spec from http://elfutils.org/ -*-
 Name: elfutils
 Version: 0.185
-Release: 2
+Release: 3
 Summary: A collection of utilities and DSOs to handle ELF files and DWARF data
 URL: http://elfutils.org/
 License: GPLv3+ and (GPLv2+ or LGPLv3+)
 Source: ftp://sourceware.org/pub/elfutils/%{version}/elfutils-%{version}.tar.bz2
-Provides:  elfutils-libelf elfutils-default-yama-scope default-yama-scope elfutils-libs
-Obsoletes: elfutils-libelf elfutils-default-yama-scope elfutils-libs
+
+Requires: elfutils-libelf = %{version}-%{release}
+Requires: elfutils-libs = %{version}-%{release}
 Requires: glibc >= 2.7 libstdc++
 
 BuildRoot: %{_tmppath}/%{name}-root
@@ -23,7 +24,6 @@ BuildRequires: pkgconfig(libarchive) >= 3.1.2
 %define _programprefix eu-
 
 %description
-
 Elfutils is a collection of utilities, including stack (to show
 backtraces), nm (for listing symbols from object files), size
 (for listing the section sizes of an object or archive file),
@@ -43,12 +43,26 @@ interprocess services, communication and introspection
 (like synchronisation, signaling, debugging, tracing and
 profiling) of processes.
 
+%package libs
+Summary: Libraries to handle compiled objects
+License: GPLv2+ or LGPLv3+
+Requires: elfutils-libelf = %{version}-%{release}
+Requires: default-yama-scope
+
+%description libs
+The elfutils-libs package contains libraries which implement DWARF, ELF,
+and machine-specific ELF handling and process introspection.  These
+libraries are used by the programs in the elfutils package.  The
+elfutils-devel package enables building other programs using these
+libraries.
+
 %package devel
 Summary: Development libraries to handle compiled objects.
 License: GPLv2+ or LGPLv3+
-Provides:  elfutils-libelf-devel elfutils-libelf-devel-static elfutils-devel-static
-Obsoletes: elfutils-libelf-devel elfutils-libelf-devel-static elfutils-devel-static
-Requires: elfutils = %{version}-%{release}
+Provides:  elfutils-libelf-devel-static elfutils-devel-static
+Obsoletes: elfutils-libelf-devel-static elfutils-devel-static
+Requires: elfutils-libs = %{version}-%{release}
+Requires: elfutils-libelf-devel = %{version}-%{release}
 
 %description devel
 The elfutils-devel package contains the libraries to create
@@ -59,10 +73,47 @@ assembler interface. libelf allows you to
 access the internals of the ELF object file format, so you can see the
 different sections of an ELF file.
 
-%package help 
+%package libelf
+Summary: Library to read and write ELF files
+License: GPLv2+ or LGPLv3+
+
+%description libelf
+The elfutils-libelf package provides a DSO which allows reading and
+writing ELF files on a high level.  Third party programs depend on
+this package to read internals of ELF files.  The programs of the
+elfutils package use it also to generate new ELF files.
+
+%package libelf-devel
+Summary: Development support for libelf
+License: GPLv2+ or LGPLv3+
+Requires: elfutils-libelf = %{version}-%{release}
+Conflicts: libelf-devel
+
+%description libelf-devel
+The elfutils-libelf-devel package contains the libraries to create
+applications for handling compiled objects.  libelf allows you to
+access the internals of the ELF object file format, so you can see the
+different sections of an ELF file.
+
+%package default-yama-scope
+Summary: Default yama attach scope sysctl setting
+License: GPLv2+ or LGPLv3+
+Provides: default-yama-scope
+BuildArch: noarch
+
+%description default-yama-scope
+Yama sysctl setting to enable default attach scope settings
+enabling programs to use ptrace attach, access to
+/proc/PID/{mem,personality,stack,syscall}, and the syscalls
+process_vm_readv and process_vm_writev which are used for
+interprocess services, communication and introspection
+(like synchronisation, signaling, debugging, tracing and
+profiling) of processes.
+
+%package help
 Summary: Help documents for elfutils
 
-%description help 
+%description help
 This package contains help documents for elfutils
 
 %package debuginfod-client
@@ -74,7 +125,7 @@ Summary: Libraries and headers to build debuginfod client applications
 License: GPLv2+ or LGPLv3+
 
 %package debuginfod
-Summary: HHTP ELF/DWARF file server address by build-id
+Summary: HTTP ELF/DWARF file server addressed by build-id
 License: GPLv3+
 BuildRequires: systemd
 Requires(post):   systemd
@@ -131,13 +182,17 @@ make -s %{?_smp_mflags} check || (cat tests/test-suite.log; true)
 %clean
 rm -rf ${RPM_BUILD_ROOT}
 
-%post 
-/sbin/ldconfig
+%post libs -p /sbin/ldconfig
+%postun libs -p /sbin/ldconfig
+%post libelf -p /sbin/ldconfig
+%postun libelf -p /sbin/ldconfig
+%post debuginfod-client -p /sbin/ldconfig
+%postun debuginfod-client -p /sbin/ldconfig
 
+%post default-yama-scope
+if [ -x /usr/lib/systemd/systemd-sysctl ] ; then
 %sysctl_apply 10-default-yama-scope.conf
-
-%postun 
-/sbin/ldconfig
+fi
 
 %files
 %defattr(-,root,root)
@@ -160,14 +215,13 @@ rm -rf ${RPM_BUILD_ROOT}
 %{_bindir}/eu-strings
 %{_bindir}/eu-strip
 %{_bindir}/eu-unstrip
+
+%files libs
+%license COPYING-GPLV2 COPYING-LGPLV3
 %{_libdir}/libasm-%{version}.so
-%{_libdir}/libasm.so.*
 %{_libdir}/libdw-%{version}.so
+%{_libdir}/libasm.so.*
 %{_libdir}/libdw.so.*
-%{_libdir}/libelf-%{version}.so
-%{_libdir}/libelf.so.*
-%{_datadir}/locale/*/LC_MESSAGES/elfutils.mo
-%{_sysctldir}/10-default-yama-scope.conf
 
 %files devel
 %defattr(-,root,root)
@@ -180,17 +234,28 @@ rm -rf ${RPM_BUILD_ROOT}
 %{_includedir}/elfutils/libdwelf.h
 %{_includedir}/elfutils/libdwfl.h
 %{_includedir}/elfutils/version.h
-%{_includedir}/gelf.h
-%{_includedir}/libelf.h
-%{_includedir}/nlist.h
 %{_libdir}/libasm.a
 %{_libdir}/libasm.so
 %{_libdir}/libdw.a
 %{_libdir}/libdw.so
 %{_libdir}/libelf.a
-%{_libdir}/libelf.so
 %{_libdir}/pkgconfig/libdw.pc
+
+%files libelf
+%license COPYING-GPLV2 COPYING-LGPLV3
+%{_libdir}/libelf-%{version}.so
+%{_libdir}/libelf.so.*
+%{_datadir}/locale/*/LC_MESSAGES/elfutils.mo
+
+%files libelf-devel
+%{_includedir}/libelf.h
+%{_includedir}/gelf.h
+%{_includedir}/nlist.h
+%{_libdir}/libelf.so
 %{_libdir}/pkgconfig/libelf.pc
+
+%files default-yama-scope
+%{_sysctldir}/10-default-yama-scope.conf
 
 %files help
 %{_mandir}/man1/eu-*.1*
@@ -234,6 +299,10 @@ exit 0
 %systemd_postun_with_restart debuginfod.service
 
 %changelog
+* Wed Sep 15 2021 panxiaohe <panxiaohe@huawei.com> - 0.185-3
+- detach subpackages elfutils-libs, elfutils-libelf,
+  elfutils-libelf-devel, elfutils-default-yama-scope
+
 * Tue Jul 27 2021 panxiaohe <panxiaohe@huawei.com> - 0.185-2
 - fix make check about bad test
 
