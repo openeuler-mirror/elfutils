@@ -1,11 +1,14 @@
 # -*- rpm-spec from http://elfutils.org/ -*-
 Name: elfutils
 Version: 0.185
-Release: 2
+Release: 3
 Summary: A collection of utilities and DSOs to handle ELF files and DWARF data
 URL: http://elfutils.org/
 License: GPLv3+ and (GPLv2+ or LGPLv3+)
 Source: ftp://sourceware.org/pub/elfutils/%{version}/elfutils-%{version}.tar.bz2
+
+Patch0: eu-elfclassify-no-stdin-should-use-classify_flag_no_stdin.patch
+
 Provides:  elfutils-libelf elfutils-default-yama-scope default-yama-scope elfutils-libs
 Obsoletes: elfutils-libelf elfutils-default-yama-scope elfutils-libs
 Requires: glibc >= 2.7 libstdc++
@@ -102,7 +105,7 @@ The ELF/DWARF file searching functions in libdwfl can query
 such servers to download those files on demand.
 
 %prep
-%setup -q
+%autosetup -n %{name}-%{version} -p1
 
 %build
 %configure --program-prefix=%{_programprefix}
@@ -234,6 +237,9 @@ exit 0
 %systemd_postun_with_restart debuginfod.service
 
 %changelog
+* Thu Feb 17 2022 panxiaohe <panxh.life@foxmail.com> - 0.185-3
+- fix wrong use of stdin for eu-elfclassify --no-stdin option
+
 * Tue Jul 27 2021 panxiaohe <panxiaohe@huawei.com> - 0.185-2
 - fix make check about bad test
 
