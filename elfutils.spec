@@ -1,7 +1,7 @@
 # -*- rpm-spec from http://elfutils.org/ -*-
 Name: elfutils
 Version: 0.185
-Release: 3
+Release: 4
 Summary: A collection of utilities and DSOs to handle ELF files and DWARF data
 URL: http://elfutils.org/
 License: GPLv3+ and (GPLv2+ or LGPLv3+)
@@ -12,9 +12,10 @@ Patch0: eu-elfclassify-no-stdin-should-use-classify_flag_no_stdin.patch
 Provides:  elfutils-libelf elfutils-default-yama-scope default-yama-scope elfutils-libs
 Obsoletes: elfutils-libelf elfutils-default-yama-scope elfutils-libs
 Requires: glibc >= 2.7 libstdc++
+Recommends: elfutils-extra
 
 BuildRoot: %{_tmppath}/%{name}-root
-BuildRequires: gcc >= 4.1.2-33 m4 zlib-devel gdb-headless gcc-c++
+BuildRequires: gcc >= 4.1.2-33 m4 zlib-devel gdb-headless gcc-c++ chrpath
 
 #for debuginfod
 BuildRequires: pkgconfig(libmicrohttpd) >= 0.9.33
@@ -30,8 +31,7 @@ BuildRequires: pkgconfig(libarchive) >= 3.1.2
 Elfutils is a collection of utilities, including stack (to show
 backtraces), nm (for listing symbols from object files), size
 (for listing the section sizes of an object or archive file),
-strip (for discarding symbols), readelf (to see the raw ELF file
-structures), elflint (to check for well-formed ELF files) and
+strip (for discarding symbols), elflint (to check for well-formed ELF files) and
 elfcompress (to compress or decompress ELF sections).
 Also included are helper libraries which implement DWARF, ELF,
 and machine-specific ELF handling and process introspection.
@@ -45,6 +45,15 @@ process_vm_readv and process_vm_writev which are used for
 interprocess services, communication and introspection
 (like synchronisation, signaling, debugging, tracing and
 profiling) of processes.
+
+%package extra
+Summary: extra package including debug tools.
+Provides: elfutils-extra
+Requires: elfutils = %{version}-%{release}
+
+%description extra
+The extra package contains debug tools.
+readelf - to see the raw ELF file structures
 
 %package devel
 Summary: Development libraries to handle compiled objects.
@@ -84,7 +93,7 @@ Requires(post):   systemd
 Requires(preun):  systemd
 Requires(postun): systemd
 Requires(pre): shadow-utils
-# To extract .dep files with a bsdtar (=libarchive) subshell
+# To extract .deb files with a bsdtar (=libarchive) subshell
 Requires: bsdtar
 
 %description debuginfod-client
@@ -122,6 +131,13 @@ rm ${RPM_BUILD_ROOT}%{_sysconfdir}/profile.d/debuginfod.sh
 rm ${RPM_BUILD_ROOT}%{_sysconfdir}/profile.d/debuginfod.csh
 
 install -Dm0644 config/10-default-yama-scope.conf ${RPM_BUILD_ROOT}%{_sysctldir}/10-default-yama-scope.conf
+
+# Remove rpath.
+chrpath --delete ${RPM_BUILD_ROOT}%{_prefix}/%{_lib}/libdw-%{version}.so
+
+mkdir -p ${RPM_BUILD_ROOT}/etc/ld.so.conf.d
+echo "%{_prefix}/%{_lib}" > ${RPM_BUILD_ROOT}/etc/ld.so.conf.d/%{name}-%{_arch}.conf
+
 install -Dm0644 config/debuginfod.service ${RPM_BUILD_ROOT}%{_unitdir}/debuginfod.service
 install -Dm0644 config/debuginfod.sysconfig ${RPM_BUILD_ROOT}%{_sysconfdir}/sysconfig/debuginfod
 mkdir -p ${RPM_BUILD_ROOT}%{_localstatedir}/cache/debuginfod
@@ -146,23 +162,20 @@ rm -rf ${RPM_BUILD_ROOT}
 %defattr(-,root,root)
 %license COPYING COPYING-GPLV2 COPYING-LGPLV3
 %doc README TODO CONTRIBUTING
-%{_bindir}/eu-addr2line
-%{_bindir}/eu-ar
-%{_bindir}/eu-elfclassify
-%{_bindir}/eu-elfcmp
-%{_bindir}/eu-elfcompress
-%{_bindir}/eu-elflint
-%{_bindir}/eu-findtextrel
-%{_bindir}/eu-make-debug-archive
-%{_bindir}/eu-nm
-%{_bindir}/eu-objdump
-%{_bindir}/eu-ranlib
-%{_bindir}/eu-readelf
-%{_bindir}/eu-size
-%{_bindir}/eu-stack
-%{_bindir}/eu-strings
-%{_bindir}/eu-strip
-%{_bindir}/eu-unstrip
+%attr(750,root,root) %{_bindir}/eu-addr2line
+%attr(750,root,root) %{_bindir}/eu-ar
+%attr(750,root,root) %{_bindir}/eu-elfclassify
+%attr(750,root,root) %{_bindir}/eu-elfcmp
+%attr(750,root,root) %{_bindir}/eu-elfcompress
+%attr(750,root,root) %{_bindir}/eu-elflint
+%attr(750,root,root) %{_bindir}/eu-findtextrel
+%attr(750,root,root) %{_bindir}/eu-make-debug-archive
+%attr(750,root,root) %{_bindir}/eu-ranlib
+%attr(750,root,root) %{_bindir}/eu-size
+%attr(750,root,root) %{_bindir}/eu-stack
+%attr(750,root,root) %{_bindir}/eu-strings
+%attr(750,root,root) %{_bindir}/eu-strip
+%attr(750,root,root) %{_bindir}/eu-unstrip
 %{_libdir}/libasm-%{version}.so
 %{_libdir}/libasm.so.*
 %{_libdir}/libdw-%{version}.so
@@ -171,6 +184,12 @@ rm -rf ${RPM_BUILD_ROOT}
 %{_libdir}/libelf.so.*
 %{_datadir}/locale/*/LC_MESSAGES/elfutils.mo
 %{_sysctldir}/10-default-yama-scope.conf
+%config(noreplace) /etc/ld.so.conf.d/*
+
+%files extra
+%attr(750,root,root) %{_bindir}/eu-objdump
+%attr(750,root,root) %{_bindir}/eu-readelf
+%attr(750,root,root) %{_bindir}/eu-nm
 
 %files devel
 %defattr(-,root,root)
@@ -237,6 +256,11 @@ exit 0
 %systemd_postun_with_restart debuginfod.service
 
 %changelog
+* Sat Mar 12 2022 zoulin <zoulin13@h-partners.com> - 0.185-4
+- remove rpath and runpath of exec files and libraries
+- change the permission of eu-* to 750
+- add elfutils-extra and move eu-nm from elfutils to elfutils-extra
+
 * Thu Feb 17 2022 panxiaohe <panxh.life@foxmail.com> - 0.185-3
 - fix wrong use of stdin for eu-elfclassify --no-stdin option
 
