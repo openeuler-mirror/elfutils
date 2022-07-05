@@ -1,14 +1,13 @@
 # -*- rpm-spec from http://elfutils.org/ -*-
 Name: elfutils
-Version: 0.185
-Release: 5
+Version: 0.187
+Release: 1
 Summary: A collection of utilities and DSOs to handle ELF files and DWARF data
 URL: http://elfutils.org/
 License: GPLv3+ and (GPLv2+ or LGPLv3+)
 Source: ftp://sourceware.org/pub/elfutils/%{version}/elfutils-%{version}.tar.bz2
 
-Patch0: eu-elfclassify-no-stdin-should-use-classify_flag_no_stdin.patch
-Patch1: Fix-segfault-in-eu-ar-m.patch
+Patch0: Fix-segfault-in-eu-ar-m.patch
 
 Requires: elfutils-libelf = %{version}-%{release}
 Requires: elfutils-libs = %{version}-%{release}
@@ -265,6 +264,7 @@ fi
 %{_mandir}/man1/debuginfod-find.1*
 %{_mandir}/man3/debuginfod_*.3*
 %{_mandir}/man3/elf_*.3*
+%{_mandir}/man7/debuginfod*.7.*
 %{_mandir}/man8/debuginfod.8*
 
 %files debuginfod-client
@@ -302,6 +302,9 @@ exit 0
 %systemd_postun_with_restart debuginfod.service
 
 %changelog
+* Fri Jul 1 2022 panxiaohe <panxh.life@foxmail.com> - 0.187-1
+- update version to 0.187
+
 * Mon Jun 27 2022 zhangruifang <zhangruifang1@h-partners.com> - 0.185-5
 - fix segfault in eu-ar -m
 
