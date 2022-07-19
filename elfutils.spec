@@ -1,7 +1,7 @@
 # -*- rpm-spec from http://elfutils.org/ -*-
 Name: elfutils
 Version: 0.180
-Release: 3
+Release: 4
 Summary: A collection of utilities and DSOs to handle ELF files and DWARF data
 URL: http://elfutils.org/
 License: GPLv3+ and (GPLv2+ or LGPLv3+)
@@ -15,6 +15,7 @@ Requires: glibc >= 2.7 libstdc++
 
 BuildRoot: %{_tmppath}/%{name}-root
 BuildRequires: gcc >= 4.1.2-33 m4 zlib-devel gdb-headless gcc-c++
+BuildRequires: bzip2-devel xz-devel xz-libs
 
 # For debuginfod
 BuildRequires: pkgconfig(libmicrohttpd) >= 0.9.33
@@ -233,6 +234,9 @@ exit 0
 %systemd_postun_with_restart debuginfod.service
 
 %changelog
+* Tue Jul 19 2022 Hugel <gengqihu1@h-partners.com> - 0.180-4
+- Add some compression support
+
 * Thu Feb 17 2022 panxiaohe <panxh.life@foxmail.com> - 0.180-3
 - fix wrong use of stdin for eu-elfclassify --no-stdin option
 
