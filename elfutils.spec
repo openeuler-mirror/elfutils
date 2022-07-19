@@ -1,7 +1,7 @@
 # -*- rpm-spec from http://elfutils.org/ -*-
 Name: elfutils
 Version: 0.187
-Release: 1
+Release: 2
 Summary: A collection of utilities and DSOs to handle ELF files and DWARF data
 URL: http://elfutils.org/
 License: GPLv3+ and (GPLv2+ or LGPLv3+)
@@ -15,6 +15,7 @@ Requires: glibc >= 2.7 libstdc++
 
 BuildRoot: %{_tmppath}/%{name}-root
 BuildRequires: gcc >= 4.1.2-33 m4 zlib-devel gdb-headless gcc-c++
+BuildRequires: bzip2-devel xz-devel xz-libs zstd-devel
 
 #for debuginfod
 BuildRequires: pkgconfig(libmicrohttpd) >= 0.9.33
@@ -302,6 +303,9 @@ exit 0
 %systemd_postun_with_restart debuginfod.service
 
 %changelog
+* Tue Jul 19 2022 Hugel <gengqihu1@h-partners.com> - 0.187-2
+- Add some compression support
+
 * Fri Jul 1 2022 panxiaohe <panxh.life@foxmail.com> - 0.187-1
 - update version to 0.187
 
