@@ -1,7 +1,7 @@
 # -*- rpm-spec from http://elfutils.org/ -*-
 Name: elfutils
 Version: 0.185
-Release: 6
+Release: 7
 Summary: A collection of utilities and DSOs to handle ELF files and DWARF data
 URL: http://elfutils.org/
 License: GPLv3+ and (GPLv2+ or LGPLv3+)
@@ -16,6 +16,7 @@ Requires: glibc >= 2.7 libstdc++
 
 BuildRoot: %{_tmppath}/%{name}-root
 BuildRequires: gcc >= 4.1.2-33 m4 zlib-devel gdb-headless gcc-c++
+BuildRequires: bzip2-devel xz-devel xz-libs zstd-devel
 
 #for debuginfod
 BuildRequires: pkgconfig(libmicrohttpd) >= 0.9.33
@@ -238,6 +239,9 @@ exit 0
 %systemd_postun_with_restart debuginfod.service
 
 %changelog
+* Tue Jul 19 2022 Hugel <gengqihu1@h-partners.com> - 0.185-7
+- Add some compression support
+
 * Mon Jun 27 2022 zhangruifang <zhangruifang1@h-partners.com> - 0.185-6
 - fix segfault in eu-ar -m
 
