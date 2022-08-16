@@ -1,0 +1,46 @@
+From 9e18fcfeb2c8ff471c11da58b05215e219be20fd Mon Sep 17 00:00:00 2001
+From: yixiangzhike <yixiangzhike007@163.com>
+Date: Tue, 16 Aug 2022 09:49:35 +0800
+Subject: [PATCH] fix error of parsing object file perms
+
+---
+ libelf/elf_begin.c | 20 +++++++++++++++++++-
+ 1 file changed, 19 insertions(+), 1 deletion(-)
+
+diff --git a/libelf/elf_begin.c b/libelf/elf_begin.c
+index 17d9b1f..581d8ef 100644
+--- a/libelf/elf_begin.c
++++ b/libelf/elf_begin.c
+@@ -997,10 +997,28 @@ __libelf_next_arhdr_wrlock (Elf *elf)
+     }									      \
+   while (0)
+ 
++#define INT_FIELD_HN(FIELD, HN)						      \
++  do									      \
++    {									      \
++      char buf[sizeof (ar_hdr->FIELD) + 1];				      \
++      const char *string = ar_hdr->FIELD;				      \
++      if (ar_hdr->FIELD[sizeof (ar_hdr->FIELD) - 1] != ' ')		      \
++	{								      \
++	  *((char *) mempcpy (buf, ar_hdr->FIELD, sizeof (ar_hdr->FIELD)))  \
++	    = '\0';							      \
++	  string = buf;							      \
++	}								      \
++      if (sizeof (elf_ar_hdr->FIELD) <= sizeof (long int))		      \
++	elf_ar_hdr->FIELD = (__typeof (elf_ar_hdr->FIELD)) strtol (string, NULL, HN);     \
++      else								      \
++	elf_ar_hdr->FIELD = (__typeof (elf_ar_hdr->FIELD)) strtoll (string, NULL, HN);    \
++    }									      \
++  while (0)
++
+   INT_FIELD (ar_date);
+   INT_FIELD (ar_uid);
+   INT_FIELD (ar_gid);
+-  INT_FIELD (ar_mode);
++  INT_FIELD_HN (ar_mode, 8);
+   INT_FIELD (ar_size);
+ 
+   if (elf_ar_hdr->ar_size < 0)
+-- 
+2.27.0
+
