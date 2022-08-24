@@ -1,13 +1,14 @@
 # -*- rpm-spec from http://elfutils.org/ -*-
 Name: elfutils
 Version: 0.180
-Release: 4
+Release: 5
 Summary: A collection of utilities and DSOs to handle ELF files and DWARF data
 URL: http://elfutils.org/
 License: GPLv3+ and (GPLv2+ or LGPLv3+)
 Source: ftp://sourceware.org/pub/elfutils/%{version}/elfutils-%{version}.tar.bz2
 
 Patch0: eu-elfclassify-no-stdin-should-use-classify_flag_no_stdin.patch
+Patch1: Fix-error-of-parsing-object-file-perms.patch
 
 Provides:  elfutils-libelf elfutils-default-yama-scope default-yama-scope elfutils-libs
 Obsoletes: elfutils-libelf elfutils-default-yama-scope elfutils-libs
@@ -234,6 +235,9 @@ exit 0
 %systemd_postun_with_restart debuginfod.service
 
 %changelog
+* Tue Aug 16 2022 yixiangzhike <yixiangzhike007@163.com> - 0.180-5
+- Fix error of parsing object file perms
+
 * Tue Jul 19 2022 Hugel <gengqihu1@h-partners.com> - 0.180-4
 - Add some compression support
 
