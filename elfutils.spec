@@ -1,7 +1,7 @@
 # -*- rpm-spec from http://elfutils.org/ -*-
 Name: elfutils
 Version: 0.185
-Release: 8
+Release: 9
 Summary: A collection of utilities and DSOs to handle ELF files and DWARF data
 URL: http://elfutils.org/
 License: GPLv3+ and (GPLv2+ or LGPLv3+)
@@ -10,6 +10,7 @@ Source: ftp://sourceware.org/pub/elfutils/%{version}/elfutils-%{version}.tar.bz2
 Patch0: eu-elfclassify-no-stdin-should-use-classify_flag_no_stdin.patch
 Patch1: Fix-segfault-in-eu-ar-m.patch
 Patch2: Fix-error-of-parsing-object-file-perms.patch
+Patch3: Fix-issue-of-moving-files-by-ar-or-br.patch
 
 Provides:  elfutils-libelf elfutils-default-yama-scope default-yama-scope elfutils-libs
 Obsoletes: elfutils-libelf elfutils-default-yama-scope elfutils-libs
@@ -240,6 +241,9 @@ exit 0
 %systemd_postun_with_restart debuginfod.service
 
 %changelog
+* Wed Aug 24 2022 yixiangzhike <yixiangzhike007@163.com> - 0.185-9
+- Fix issue of moving files by ar or br
+
 * Tue Aug 16 2022 yixiangzhike <yixiangzhike007@163.com> - 0.185-8
 - Fix error of parsing object file perms
 
