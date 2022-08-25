@@ -1,7 +1,7 @@
 # -*- rpm-spec from http://elfutils.org/ -*-
 Name: elfutils
 Version: 0.187
-Release: 3
+Release: 4
 Summary: A collection of utilities and DSOs to handle ELF files and DWARF data
 URL: http://elfutils.org/
 License: GPLv3+ and (GPLv2+ or LGPLv3+)
@@ -9,6 +9,7 @@ Source: ftp://sourceware.org/pub/elfutils/%{version}/elfutils-%{version}.tar.bz2
 
 Patch0: Fix-segfault-in-eu-ar-m.patch
 Patch1: Fix-error-of-parsing-object-file-perms.patch
+Patch2: Fix-issue-of-moving-files-by-ar-or-br.patch
 
 Requires: elfutils-libelf = %{version}-%{release}
 Requires: elfutils-libs = %{version}-%{release}
@@ -304,6 +305,9 @@ exit 0
 %systemd_postun_with_restart debuginfod.service
 
 %changelog
+* Wed Aug 24 2022 yixiangzhike <yixiangzhike007@163.com> - 0.187-4
+- Fix issue of moving files by ar or br
+
 * Tue Aug 16 2022 yixiangzhike <yixiangzhike007@163.com> - 0.187-3
 - Fix error of parsing object file perms
 
