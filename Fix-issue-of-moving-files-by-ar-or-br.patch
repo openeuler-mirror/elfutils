@@ -1,0 +1,28 @@
+From e155af3cf1ed9a215459ee161f7632b8b8b62e52 Mon Sep 17 00:00:00 2001
+From: yixiangzhike <yixiangzhike007@163.com>
+Date: Wed, 17 Aug 2022 16:44:03 +0800
+Subject: [PATCH] fix issue of moving files by ar or br
+
+When eu-ar uses the combination of br or ar parameters to move the exist files,
+it forgets to add the files to the new linked list. As a result, the files are lost.
+---
+ src/ar.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/src/ar.c b/src/ar.c
+index 42126aa..56fb9ed 100644
+--- a/src/ar.c
++++ b/src/ar.c
+@@ -1342,7 +1342,8 @@ do_oper_insert (int oper, const char *arfname, char **argv, int argc,
+ 
+   struct armem *last_added = after_memberelem;
+   for (int cnt = 0; cnt < argc; ++cnt)
+-    if (oper != oper_replace || found[cnt]->old_off == -1)
++    if (((oper == oper_replace) && (ipos != ipos_none) && (found[cnt]->old_off != -1)) || \
++	oper != oper_replace || found[cnt]->old_off == -1)
+       {
+ 	if (last_added == NULL)
+ 	  {
+-- 
+2.27.0
+
