@@ -1,0 +1,34 @@
+From 246d6d0ffcfe9ac6ef3581ca74399036aa827590 Mon Sep 17 00:00:00 2001
+From: panxiaohe <panxh.life@foxmail.com>
+Date: Fri, 12 Aug 2022 17:05:40 +0800
+Subject: [PATCH] get instance correctly for eu-ar -N option
+
+---
+ src/ar.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/ar.c b/src/ar.c
+index 42126aa..f8166d3 100644
+--- a/src/ar.c
++++ b/src/ar.c
+@@ -518,7 +518,7 @@ do_oper_extract (int oper, const char *arfname, char **argv, int argc,
+ 	  ENTRY entry;
+ 	  entry.key = arhdr->ar_name;
+ 	  ENTRY *res = hsearch (entry, FIND);
+-	  if (res != NULL && (instance < 0 || instance-- == 0)
++	  if (res != NULL && (instance < 0 || --instance == 0)
+ 	      && !found[(char **) res->data - argv])
+ 	    found[(char **) res->data - argv] = do_extract = true;
+ 	}
+@@ -952,7 +952,7 @@ do_oper_delete (const char *arfname, char **argv, int argc,
+ 	  ENTRY entry;
+ 	  entry.key = arhdr->ar_name;
+ 	  ENTRY *res = hsearch (entry, FIND);
+-	  if (res != NULL && (instance < 0 || instance-- == 0)
++	  if (res != NULL && (instance < 0 || --instance == 0)
+ 	      && !found[(char **) res->data - argv])
+ 	    found[(char **) res->data - argv] = do_delete = true;
+ 	}
+-- 
+2.27.0
+
