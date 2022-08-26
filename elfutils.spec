@@ -1,7 +1,7 @@
 # -*- rpm-spec from http://elfutils.org/ -*-
 Name: elfutils
 Version: 0.187
-Release: 4
+Release: 5
 Summary: A collection of utilities and DSOs to handle ELF files and DWARF data
 URL: http://elfutils.org/
 License: GPLv3+ and (GPLv2+ or LGPLv3+)
@@ -10,6 +10,7 @@ Source: ftp://sourceware.org/pub/elfutils/%{version}/elfutils-%{version}.tar.bz2
 Patch0: Fix-segfault-in-eu-ar-m.patch
 Patch1: Fix-error-of-parsing-object-file-perms.patch
 Patch2: Fix-issue-of-moving-files-by-ar-or-br.patch
+Patch3: Get-instance-correctly-for-eu-ar-N-option.patch
 
 Requires: elfutils-libelf = %{version}-%{release}
 Requires: elfutils-libs = %{version}-%{release}
@@ -162,7 +163,7 @@ such servers to download those files on demand.
 
 %build
 %configure --program-prefix=%{_programprefix}
-make -s %{?_smp_mflags}
+%make_build
 
 %install
 rm -rf ${RPM_BUILD_ROOT}
@@ -182,7 +183,7 @@ touch ${RPM_BUILD_ROOT}%{_localstatedir}/cache/debuginfod/debuginfod.sqlite
 
 %check
 # run-debuginfod-find.sh is a bad test
-make -s %{?_smp_mflags} check || (cat tests/test-suite.log; true)
+%make_build check || (cat tests/test-suite.log; true)
 
 %clean
 rm -rf ${RPM_BUILD_ROOT}
@@ -305,6 +306,10 @@ exit 0
 %systemd_postun_with_restart debuginfod.service
 
 %changelog
+* Fri Aug 26 2022 panxiaohe <panxh.life@foxmail.com> - 0.187-5
+- Get instance correctly for eu-ar -N option
+- Use make macros
+
 * Wed Aug 24 2022 yixiangzhike <yixiangzhike007@163.com> - 0.187-4
 - Fix issue of moving files by ar or br
 
