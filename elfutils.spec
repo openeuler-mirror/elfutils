@@ -1,16 +1,17 @@
 # -*- rpm-spec from http://elfutils.org/ -*-
 Name: elfutils
 Version: 0.185
-Release: 9
+Release: 10
 Summary: A collection of utilities and DSOs to handle ELF files and DWARF data
 URL: http://elfutils.org/
 License: GPLv3+ and (GPLv2+ or LGPLv3+)
 Source: ftp://sourceware.org/pub/elfutils/%{version}/elfutils-%{version}.tar.bz2
 
-Patch0: eu-elfclassify-no-stdin-should-use-classify_flag_no_stdin.patch
+Patch0: backport-elfclassify-Fix-no-stdin-flag.patch
 Patch1: Fix-segfault-in-eu-ar-m.patch
 Patch2: Fix-error-of-parsing-object-file-perms.patch
 Patch3: Fix-issue-of-moving-files-by-ar-or-br.patch
+Patch4: Get-instance-correctly-for-eu-ar-N-option.patch
 
 Provides:  elfutils-libelf elfutils-default-yama-scope default-yama-scope elfutils-libs
 Obsoletes: elfutils-libelf elfutils-default-yama-scope elfutils-libs
@@ -113,7 +114,7 @@ such servers to download those files on demand.
 
 %build
 %configure --program-prefix=%{_programprefix}
-make -s %{?_smp_mflags}
+%make_build
 
 %install
 rm -rf ${RPM_BUILD_ROOT}
@@ -133,7 +134,7 @@ touch ${RPM_BUILD_ROOT}%{_localstatedir}/cache/debuginfod/debuginfod.sqlite
 
 %check
 # run-debuginfod-find.sh is a bad test
-make -s %{?_smp_mflags} check || (cat tests/test-suite.log; true)
+%make_build check || (cat tests/test-suite.log; true)
 
 %clean
 rm -rf ${RPM_BUILD_ROOT}
@@ -241,6 +242,11 @@ exit 0
 %systemd_postun_with_restart debuginfod.service
 
 %changelog
+* Fri Aug 26 2022 panxiaohe <panxh.life@foxmail.com> - 0.185-10
+- Get instance correctly for eu-ar -N option
+- Use make macros
+- Use upstream patch for no stdin flag
+
 * Wed Aug 24 2022 yixiangzhike <yixiangzhike007@163.com> - 0.185-9
 - Fix issue of moving files by ar or br
 
