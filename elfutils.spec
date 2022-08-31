@@ -1,7 +1,7 @@
 # -*- rpm-spec from http://elfutils.org/ -*-
 Name: elfutils
 Version: 0.180
-Release: 7
+Release: 8
 Summary: A collection of utilities and DSOs to handle ELF files and DWARF data
 URL: http://elfutils.org/
 License: GPLv3+ and (GPLv2+ or LGPLv3+)
@@ -19,6 +19,7 @@ Requires: glibc >= 2.7 libstdc++
 BuildRoot: %{_tmppath}/%{name}-root
 BuildRequires: gcc >= 4.1.2-33 m4 zlib-devel gdb-headless gcc-c++
 BuildRequires: bzip2-devel xz-devel xz-libs
+BuildRequires: chrpath
 
 # For debuginfod
 BuildRequires: pkgconfig(libmicrohttpd) >= 0.9.33
@@ -123,6 +124,12 @@ mkdir -p ${RPM_BUILD_ROOT}%{_prefix}
 chmod +x ${RPM_BUILD_ROOT}%{_prefix}/%{_lib}/lib*.so*
 
 install -Dm0644 config/10-default-yama-scope.conf ${RPM_BUILD_ROOT}%{_sysctldir}/10-default-yama-scope.conf
+# Remove rpath
+chrpath --delete  ${RPM_BUILD_ROOT}%{_prefix}/%{_lib}/libdw-%{version}.so
+
+mkdir -p ${RPM_BUILD_ROOT}/etc/ld.so.conf.d
+echo "%{_prefix}/%{_lib}" > ${RPM_BUILD_ROOT}/etc/ld.so.conf.d/%{name}-%{_arch}.conf
+
 install -Dm0644 config/debuginfod.service ${RPM_BUILD_ROOT}%{_unitdir}/debuginfod.service
 install -Dm0644 config/debuginfod.sysconfig ${RPM_BUILD_ROOT}%{_sysconfdir}/sysconfig/debuginfod
 mkdir -p ${RPM_BUILD_ROOT}%{_localstatedir}/cache/debuginfod
@@ -171,6 +178,7 @@ rm -rf ${RPM_BUILD_ROOT}
 %{_libdir}/libelf.so.*
 %{_datadir}/locale/*/LC_MESSAGES/elfutils.mo
 %{_sysctldir}/10-default-yama-scope.conf
+%config(noreplace) /etc/ld.so.conf.d/*
 
 %files devel
 %defattr(-,root,root)
@@ -237,6 +245,9 @@ exit 0
 %systemd_postun_with_restart debuginfod.service
 
 %changelog
+* Wed Aug 31 2022 zhangruifang <zhangruifang1@h-partners.com> - 0.180-8
+- remove rpath and runpath of exec files and libraries
+
 * Fri Aug 26 2022 panxiaohe <panxh.life@foxmail.com> - 0.180-7
 - Get instance correctly for eu-ar -N option
 - Use make macros
