@@ -1,7 +1,7 @@
 # -*- rpm-spec from http://elfutils.org/ -*-
 Name: elfutils
 Version: 0.180
-Release: 9
+Release: 10
 Summary: A collection of utilities and DSOs to handle ELF files and DWARF data
 URL: http://elfutils.org/
 License: GPLv3+ and (GPLv2+ or LGPLv3+)
@@ -19,7 +19,6 @@ Recommends: elfutils-extra
 
 BuildRoot: %{_tmppath}/%{name}-root
 BuildRequires: gcc >= 4.1.2-33 m4 zlib-devel gdb-headless gcc-c++
-BuildRequires: bzip2-devel xz-devel xz-libs
 BuildRequires: chrpath
 
 # For debuginfod
@@ -256,6 +255,9 @@ exit 0
 %systemd_postun_with_restart debuginfod.service
 
 %changelog
+* Sat Sep 3 2022 panxiaohe <panxh.life@foxmail.com> - 0.180-10
+- revert commit "add some compression support"
+
 * Thu Sep 1 2022 panxiaohe <panxh.life@foxmail.com> - 0.180-9
 - change the permission of eu-* to 750
 - add elfutils-extra
