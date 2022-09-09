@@ -1,7 +1,7 @@
 # -*- rpm-spec from http://elfutils.org/ -*-
 Name: elfutils
 Version: 0.185
-Release: 10
+Release: 11
 Summary: A collection of utilities and DSOs to handle ELF files and DWARF data
 URL: http://elfutils.org/
 License: GPLv3+ and (GPLv2+ or LGPLv3+)
@@ -14,7 +14,7 @@ Patch3: Fix-issue-of-moving-files-by-ar-or-br.patch
 Patch4: Get-instance-correctly-for-eu-ar-N-option.patch
 
 Provides:  elfutils-libelf elfutils-default-yama-scope default-yama-scope elfutils-libs
-Obsoletes: elfutils-libelf elfutils-default-yama-scope elfutils-libs
+Obsoletes: elfutils-libelf < %{version}-%{release} elfutils-default-yama-scope < %{version}-%{release} elfutils-libs < %{version}-%{release}
 Requires: glibc >= 2.7 libstdc++
 
 BuildRoot: %{_tmppath}/%{name}-root
@@ -55,7 +55,7 @@ profiling) of processes.
 Summary: Development libraries to handle compiled objects.
 License: GPLv2+ or LGPLv3+
 Provides:  elfutils-libelf-devel elfutils-libelf-devel-static elfutils-devel-static
-Obsoletes: elfutils-libelf-devel elfutils-libelf-devel-static elfutils-devel-static
+Obsoletes: elfutils-libelf-devel < %{version}-%{release} elfutils-libelf-devel-static < %{version}-%{release} elfutils-devel-static < %{version}-%{release}
 Requires: elfutils = %{version}-%{release}
 
 %description devel
@@ -211,12 +211,13 @@ rm -rf ${RPM_BUILD_ROOT}
 %defattr(-,root,root)
 %{_libdir}/libdebuginfod-%{version}.so
 %{_bindir}/debuginfod-find
+%{_libdir}/libdebuginfod.so.*
 
 %files debuginfod-client-devel
 %defattr(-,root,root)
 %{_libdir}/pkgconfig/libdebuginfod.pc
 %{_includedir}/elfutils/debuginfod.h
-%{_libdir}/libdebuginfod.so*
+%{_libdir}/libdebuginfod.so
  
 %files debuginfod
 %defattr(-,root,root)
@@ -242,6 +243,10 @@ exit 0
 %systemd_postun_with_restart debuginfod.service
 
 %changelog
+* Fri Sep 9 2022 fuanan <fuanan3@h-partners.com> - 0.185-11
+- Fix "/usr/lib64/libdebuginfod.so.1" not found when uninstall elfutils-debuginfod-client-devel
+- Fix Obsoletes in spec
+
 * Fri Aug 26 2022 panxiaohe <panxh.life@foxmail.com> - 0.185-10
 - Get instance correctly for eu-ar -N option
 - Use make macros
