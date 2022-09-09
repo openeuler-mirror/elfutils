@@ -1,7 +1,7 @@
 # -*- rpm-spec from http://elfutils.org/ -*-
 Name: elfutils
 Version: 0.180
-Release: 8
+Release: 9
 Summary: A collection of utilities and DSOs to handle ELF files and DWARF data
 URL: http://elfutils.org/
 License: GPLv3+ and (GPLv2+ or LGPLv3+)
@@ -66,7 +66,7 @@ libraries.
 Summary: Development libraries to handle compiled objects.
 License: GPLv2+ or LGPLv3+
 Provides:  elfutils-libelf-devel-static elfutils-devel-static
-Obsoletes: elfutils-libelf-devel-static elfutils-devel-static
+Obsoletes: elfutils-libelf-devel-static < %{version}-%{release} elfutils-devel-static < %{version}-%{release}
 Requires: elfutils-libs = %{version}-%{release}
 Requires: elfutils-libelf-devel = %{version}-%{release}
 
@@ -270,12 +270,13 @@ fi
 %defattr(-,root,root)
 %{_libdir}/libdebuginfod-%{version}.so
 %{_bindir}/debuginfod-find
+%{_libdir}/libdebuginfod.so.*
 
 %files debuginfod-client-devel
 %defattr(-,root,root)
 %{_libdir}/pkgconfig/libdebuginfod.pc
 %{_includedir}/elfutils/debuginfod.h
-%{_libdir}/libdebuginfod.so*
+%{_libdir}/libdebuginfod.so
 
 %files debuginfod
 %defattr(-,root,root)
@@ -301,6 +302,10 @@ exit 0
 %systemd_postun_with_restart debuginfod.service
 
 %changelog
+* Fri Sep 9 2022 fuanan <fuanan3@h-partners.com> - 0.180-9
+- Fix "/usr/lib64/libdebuginfod.so.1" not found when uninstall elfutils-debuginfod-client-devel
+- Fix Obsoletes in spec
+
 * Fri Aug 26 2022 panxiaohe <panxh.life@foxmail.com> - 0.180-8
 - Get instance correctly for eu-ar -N option
 - Use make macros
