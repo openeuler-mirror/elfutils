@@ -1,7 +1,7 @@
 # -*- rpm-spec from http://elfutils.org/ -*-
 Name: elfutils
 Version: 0.185
-Release: 11
+Release: 12
 Summary: A collection of utilities and DSOs to handle ELF files and DWARF data
 URL: http://elfutils.org/
 License: GPLv3+ and (GPLv2+ or LGPLv3+)
@@ -16,6 +16,7 @@ Patch4: Get-instance-correctly-for-eu-ar-N-option.patch
 Provides:  elfutils-libelf elfutils-default-yama-scope default-yama-scope elfutils-libs
 Obsoletes: elfutils-libelf < %{version}-%{release} elfutils-default-yama-scope < %{version}-%{release} elfutils-libs < %{version}-%{release}
 Requires: glibc >= 2.7 libstdc++
+Recommends: elfutils-extra
 
 BuildRoot: %{_tmppath}/%{name}-root
 BuildRequires: gcc >= 4.1.2-33 m4 zlib-devel gdb-headless gcc-c++
@@ -35,8 +36,7 @@ BuildRequires: pkgconfig(libarchive) >= 3.1.2
 Elfutils is a collection of utilities, including stack (to show
 backtraces), nm (for listing symbols from object files), size
 (for listing the section sizes of an object or archive file),
-strip (for discarding symbols), readelf (to see the raw ELF file
-structures), elflint (to check for well-formed ELF files) and
+strip (for discarding symbols), elflint (to check for well-formed ELF files) and
 elfcompress (to compress or decompress ELF sections).
 Also included are helper libraries which implement DWARF, ELF,
 and machine-specific ELF handling and process introspection.
@@ -50,6 +50,15 @@ process_vm_readv and process_vm_writev which are used for
 interprocess services, communication and introspection
 (like synchronisation, signaling, debugging, tracing and
 profiling) of processes.
+
+%package extra
+Summary: extra package including debug tools
+Provides: elfutils-extra
+Requires: elfutils = %{version}-%{release}
+
+%description extra
+The extra package contains debug tools.
+readelf - to see the raw ELF file structures
 
 %package devel
 Summary: Development libraries to handle compiled objects.
@@ -89,7 +98,7 @@ Requires(post):   systemd
 Requires(preun):  systemd
 Requires(postun): systemd
 Requires(pre): shadow-utils
-# To extract .dep files with a bsdtar (=libarchive) subshell
+# To extract .deb files with a bsdtar (=libarchive) subshell
 Requires: bsdtar
 
 %description debuginfod-client
@@ -151,23 +160,23 @@ rm -rf ${RPM_BUILD_ROOT}
 %defattr(-,root,root)
 %license COPYING COPYING-GPLV2 COPYING-LGPLV3
 %doc README TODO CONTRIBUTING
-%{_bindir}/eu-addr2line
-%{_bindir}/eu-ar
-%{_bindir}/eu-elfclassify
-%{_bindir}/eu-elfcmp
 %{_bindir}/eu-elfcompress
-%{_bindir}/eu-elflint
-%{_bindir}/eu-findtextrel
-%{_bindir}/eu-make-debug-archive
-%{_bindir}/eu-nm
-%{_bindir}/eu-objdump
-%{_bindir}/eu-ranlib
-%{_bindir}/eu-readelf
-%{_bindir}/eu-size
-%{_bindir}/eu-stack
-%{_bindir}/eu-strings
 %{_bindir}/eu-strip
-%{_bindir}/eu-unstrip
+%attr(750,root,root) %{_bindir}/eu-addr2line
+%attr(750,root,root) %{_bindir}/eu-ar
+%attr(750,root,root) %{_bindir}/eu-elfclassify
+%attr(750,root,root) %{_bindir}/eu-elfcmp
+%attr(750,root,root) %{_bindir}/eu-elflint
+%attr(750,root,root) %{_bindir}/eu-findtextrel
+%attr(750,root,root) %{_bindir}/eu-make-debug-archive
+%attr(750,root,root) %{_bindir}/eu-nm
+%attr(750,root,root) %{_bindir}/eu-objdump
+%attr(750,root,root) %{_bindir}/eu-ranlib
+%attr(750,root,root) %{_bindir}/eu-readelf
+%attr(750,root,root) %{_bindir}/eu-size
+%attr(750,root,root) %{_bindir}/eu-stack
+%attr(750,root,root) %{_bindir}/eu-strings
+%attr(750,root,root) %{_bindir}/eu-unstrip
 %{_libdir}/libasm-%{version}.so
 %{_libdir}/libasm.so.*
 %{_libdir}/libdw-%{version}.so
@@ -176,6 +185,11 @@ rm -rf ${RPM_BUILD_ROOT}
 %{_libdir}/libelf.so.*
 %{_datadir}/locale/*/LC_MESSAGES/elfutils.mo
 %{_sysctldir}/10-default-yama-scope.conf
+
+%files extra
+%attr(750,root,root) %{_bindir}/eu-objdump
+%attr(750,root,root) %{_bindir}/eu-readelf
+%attr(750,root,root) %{_bindir}/eu-nm
 
 %files devel
 %defattr(-,root,root)
@@ -243,6 +257,12 @@ exit 0
 %systemd_postun_with_restart debuginfod.service
 
 %changelog
+* Tue Sep 20 2022 hubin <hubin73@huawei.com> - 0.185-12
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC:change permission to 750 and move debug tools into extra package
+
 * Fri Sep 9 2022 fuanan <fuanan3@h-partners.com> - 0.185-11
 - Fix "/usr/lib64/libdebuginfod.so.1" not found when uninstall elfutils-debuginfod-client-devel
 - Fix Obsoletes in spec
