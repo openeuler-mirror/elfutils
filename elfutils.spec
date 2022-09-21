@@ -1,7 +1,7 @@
 # -*- rpm-spec from http://elfutils.org/ -*-
 Name: elfutils
 Version: 0.185
-Release: 12
+Release: 13
 Summary: A collection of utilities and DSOs to handle ELF files and DWARF data
 URL: http://elfutils.org/
 License: GPLv3+ and (GPLv2+ or LGPLv3+)
@@ -169,10 +169,7 @@ rm -rf ${RPM_BUILD_ROOT}
 %attr(750,root,root) %{_bindir}/eu-elflint
 %attr(750,root,root) %{_bindir}/eu-findtextrel
 %attr(750,root,root) %{_bindir}/eu-make-debug-archive
-%attr(750,root,root) %{_bindir}/eu-nm
-%attr(750,root,root) %{_bindir}/eu-objdump
 %attr(750,root,root) %{_bindir}/eu-ranlib
-%attr(750,root,root) %{_bindir}/eu-readelf
 %attr(750,root,root) %{_bindir}/eu-size
 %attr(750,root,root) %{_bindir}/eu-stack
 %attr(750,root,root) %{_bindir}/eu-strings
@@ -187,9 +184,9 @@ rm -rf ${RPM_BUILD_ROOT}
 %{_sysctldir}/10-default-yama-scope.conf
 
 %files extra
-%attr(750,root,root) %{_bindir}/eu-objdump
-%attr(750,root,root) %{_bindir}/eu-readelf
-%attr(750,root,root) %{_bindir}/eu-nm
+%{_bindir}/eu-objdump
+%{_bindir}/eu-readelf
+%{_bindir}/eu-nm
 
 %files devel
 %defattr(-,root,root)
@@ -257,6 +254,12 @@ exit 0
 %systemd_postun_with_restart debuginfod.service
 
 %changelog
+* Tue Sep 20 2022 hubin <hubin73@huawei.com> - 0.185-13
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC:change readelf permission
+
 * Tue Sep 20 2022 hubin <hubin73@huawei.com> - 0.185-12
 - Type:bugfix
 - ID:NA
