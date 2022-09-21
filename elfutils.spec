@@ -1,7 +1,7 @@
 # -*- rpm-spec from http://elfutils.org/ -*-
 Name: elfutils
 Version: 0.180
-Release: 11
+Release: 12
 Summary: A collection of utilities and DSOs to handle ELF files and DWARF data
 URL: http://elfutils.org/
 License: GPLv3+ and (GPLv2+ or LGPLv3+)
@@ -186,9 +186,9 @@ rm -rf ${RPM_BUILD_ROOT}
 %config(noreplace) /etc/ld.so.conf.d/*
 
 %files extra
-%attr(750,root,root) %{_bindir}/eu-objdump
-%attr(750,root,root) %{_bindir}/eu-readelf
-%attr(750,root,root) %{_bindir}/eu-nm
+%{_bindir}/eu-objdump
+%{_bindir}/eu-readelf
+%{_bindir}/eu-nm
 
 %files devel
 %defattr(-,root,root)
@@ -256,6 +256,12 @@ exit 0
 %systemd_postun_with_restart debuginfod.service
 
 %changelog
+* Wed Sep 21 2022 hubin <hubin73@huawei.com> - 0.180-12
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC:change readelf permission
+
 * Fri Sep 9 2022 fuanan <fuanan3@h-partners.com> - 0.180-11
 - Fix "/usr/lib64/libdebuginfod.so.1" not found when uninstall elfutils-debuginfod-client-devel
 - Fix Obsoletes in spec
