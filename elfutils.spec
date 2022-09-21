@@ -1,7 +1,7 @@
 # -*- rpm-spec from http://elfutils.org/ -*-
 Name: elfutils
 Version: 0.187
-Release: 7
+Release: 8
 Summary: A collection of utilities and DSOs to handle ELF files and DWARF data
 URL: http://elfutils.org/
 License: GPLv3+ and (GPLv2+ or LGPLv3+)
@@ -236,9 +236,9 @@ fi
 %{_libdir}/libdw.so.*
 
 %files extra
-%attr(750,root,root) %{_bindir}/eu-objdump
-%attr(750,root,root) %{_bindir}/eu-readelf
-%attr(750,root,root) %{_bindir}/eu-nm
+%{_bindir}/eu-objdump
+%{_bindir}/eu-readelf
+%{_bindir}/eu-nm
 
 %files devel
 %defattr(-,root,root)
@@ -318,6 +318,12 @@ exit 0
 %systemd_postun_with_restart debuginfod.service
 
 %changelog
+* Tue Sep 20 2022 hubin <hubin73@huawei.com> - 0.187-8
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC:change readelf permission
+
 * Tue Sep 20 2022 hubin <hubin73@huawei.com> - 0.187-7
 - Type:bugfix
 - ID:NA
