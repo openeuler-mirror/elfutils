@@ -1,7 +1,7 @@
 # -*- rpm-spec from http://elfutils.org/ -*-
 Name: elfutils
 Version: 0.187
-Release: 6
+Release: 7
 Summary: A collection of utilities and DSOs to handle ELF files and DWARF data
 URL: http://elfutils.org/
 License: GPLv3+ and (GPLv2+ or LGPLv3+)
@@ -15,6 +15,7 @@ Patch3: Get-instance-correctly-for-eu-ar-N-option.patch
 Requires: elfutils-libelf = %{version}-%{release}
 Requires: elfutils-libs = %{version}-%{release}
 Requires: glibc >= 2.7 libstdc++
+Recommends: elfutils-extra
 
 BuildRoot: %{_tmppath}/%{name}-root
 BuildRequires: gcc >= 4.1.2-33 m4 zlib-devel gdb-headless gcc-c++
@@ -61,6 +62,14 @@ and machine-specific ELF handling and process introspection.  These
 libraries are used by the programs in the elfutils package.  The
 elfutils-devel package enables building other programs using these
 libraries.
+
+%package extra
+Summary: extra package including debug tools
+Provides: elfutils-extra
+Requires: elfutils = %{version}-%{release}
+
+%description extra
+The extra package contains debug tools.
 
 %package devel
 Summary: Development libraries to handle compiled objects.
@@ -212,10 +221,7 @@ fi
 %{_bindir}/eu-elflint
 %{_bindir}/eu-findtextrel
 %{_bindir}/eu-make-debug-archive
-%{_bindir}/eu-nm
-%{_bindir}/eu-objdump
 %{_bindir}/eu-ranlib
-%{_bindir}/eu-readelf
 %{_bindir}/eu-size
 %{_bindir}/eu-stack
 %{_bindir}/eu-strings
@@ -228,6 +234,11 @@ fi
 %{_libdir}/libdw-%{version}.so
 %{_libdir}/libasm.so.*
 %{_libdir}/libdw.so.*
+
+%files extra
+%{_bindir}/eu-objdump
+%{_bindir}/eu-readelf
+%{_bindir}/eu-nm
 
 %files devel
 %defattr(-,root,root)
@@ -307,6 +318,12 @@ exit 0
 %systemd_postun_with_restart debuginfod.service
 
 %changelog
+* Tue Sep 20 2022 hubin <hubin73@huawei.com> - 0.187-7
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC:move debug tools into extra package
+
 * Fri Sep 9 2022 fuanan <fuanan3@h-partners.com> - 0.187-6
 - Fix "/usr/lib64/libdebuginfod.so.1" not found when uninstall elfutils-debuginfod-client-devel
 - Fix Obsoletes in spec
