@@ -1,7 +1,7 @@
 # -*- rpm-spec from http://elfutils.org/ -*-
 Name: elfutils
 Version: 0.187
-Release: 8
+Release: 9
 Summary: A collection of utilities and DSOs to handle ELF files and DWARF data
 URL: http://elfutils.org/
 License: GPLv3+ and (GPLv2+ or LGPLv3+)
@@ -215,18 +215,18 @@ fi
 %doc README TODO CONTRIBUTING
 %{_bindir}/eu-elfcompress
 %{_bindir}/eu-strip
-%attr(750,root,root) %{_bindir}/eu-addr2line
-%attr(750,root,root) %{_bindir}/eu-ar
-%attr(750,root,root) %{_bindir}/eu-elfclassify
-%attr(750,root,root) %{_bindir}/eu-elfcmp
-%attr(750,root,root) %{_bindir}/eu-elflint
-%attr(750,root,root) %{_bindir}/eu-findtextrel
-%attr(750,root,root) %{_bindir}/eu-make-debug-archive
-%attr(750,root,root) %{_bindir}/eu-ranlib
-%attr(750,root,root) %{_bindir}/eu-size
-%attr(750,root,root) %{_bindir}/eu-stack
-%attr(750,root,root) %{_bindir}/eu-strings
-%attr(750,root,root) %{_bindir}/eu-unstrip
+%{_bindir}/eu-addr2line
+%{_bindir}/eu-ar
+%{_bindir}/eu-elfclassify
+%{_bindir}/eu-elfcmp
+%{_bindir}/eu-elflint
+%{_bindir}/eu-findtextrel
+%{_bindir}/eu-make-debug-archive
+%{_bindir}/eu-ranlib
+%{_bindir}/eu-size
+%{_bindir}/eu-stack
+%{_bindir}/eu-strings
+%{_bindir}/eu-unstrip
 
 %files libs
 %license COPYING-GPLV2 COPYING-LGPLV3
@@ -318,6 +318,12 @@ exit 0
 %systemd_postun_with_restart debuginfod.service
 
 %changelog
+* Tue Nov 1 2022 zhangruifang <zhangruifang1@h-partners.com> - 0.187-9
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC:Delete the permission(750) setting for eu-*
+
 * Tue Sep 20 2022 hubin <hubin73@huawei.com> - 0.187-8
 - Type:bugfix
 - ID:NA
