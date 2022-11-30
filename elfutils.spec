@@ -1,7 +1,7 @@
 # -*- rpm-spec from http://elfutils.org/ -*-
 Name: elfutils
 Version: 0.187
-Release: 9
+Release: 10
 Summary: A collection of utilities and DSOs to handle ELF files and DWARF data
 URL: http://elfutils.org/
 License: GPLv3+ and (GPLv2+ or LGPLv3+)
@@ -11,6 +11,7 @@ Patch0: Fix-segfault-in-eu-ar-m.patch
 Patch1: Fix-error-of-parsing-object-file-perms.patch
 Patch2: Fix-issue-of-moving-files-by-ar-or-br.patch
 Patch3: Get-instance-correctly-for-eu-ar-N-option.patch
+Patch4: elfutils-Add-sw64-architecture.patch
 
 Requires: elfutils-libelf = %{version}-%{release}
 Requires: elfutils-libs = %{version}-%{release}
@@ -168,7 +169,14 @@ The ELF/DWARF file searching functions in libdwfl can query
 such servers to download those files on demand.
 
 %prep
-%autosetup -n %{name}-%{version} -p1
+%setup -n %{name}-%{version}
+%patch0 -p1
+%patch1 -p1
+%patch2 -p1
+%patch3 -p1
+%ifarch sw_64
+%patch4 -p1
+%endif
 
 %build
 %configure --program-prefix=%{_programprefix}
@@ -318,6 +326,12 @@ exit 0
 %systemd_postun_with_restart debuginfod.service
 
 %changelog
+* Mon Nov 14 2022 wuzx<wuzx1226@qq.com> - 0.187-10
+- Type:feature
+- CVE:NA
+- SUG:NA
+- DESC:Add sw64 architecture
+
 * Tue Nov 1 2022 zhangruifang <zhangruifang1@h-partners.com> - 0.187-9
 - Type:bugfix
 - ID:NA
