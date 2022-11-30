@@ -1,7 +1,7 @@
 # -*- rpm-spec from http://elfutils.org/ -*-
 Name: elfutils
 Version: 0.185
-Release: 14
+Release: 15
 Summary: A collection of utilities and DSOs to handle ELF files and DWARF data
 URL: http://elfutils.org/
 License: GPLv3+ and (GPLv2+ or LGPLv3+)
@@ -12,6 +12,7 @@ Patch1: Fix-segfault-in-eu-ar-m.patch
 Patch2: Fix-error-of-parsing-object-file-perms.patch
 Patch3: Fix-issue-of-moving-files-by-ar-or-br.patch
 Patch4: Get-instance-correctly-for-eu-ar-N-option.patch
+Patch5: backport-readelf-Handle-DW_LLE_GNU_view_pair.patch
 
 Provides:  elfutils-libelf elfutils-default-yama-scope default-yama-scope elfutils-libs
 Obsoletes: elfutils-libelf < %{version}-%{release} elfutils-default-yama-scope < %{version}-%{release} elfutils-libs < %{version}-%{release}
@@ -254,6 +255,12 @@ exit 0
 %systemd_postun_with_restart debuginfod.service
 
 %changelog
+* Wed Nov 30 2022 linzhuorong <linzhuorong@huawei.com> - 0.185-15
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC:readelf: Handle DW_LLE_GNU_view_pair
+
 * Mon Oct 31 2022 zhangruifang <zhangruifang1@h-partners.com> - 0.185-14
 - Type:bugfix
 - ID:NA
