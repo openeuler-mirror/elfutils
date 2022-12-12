@@ -1,0 +1,61 @@
+From 6044f53da763346a59a2c070e2dc9502b8b61459 Mon Sep 17 00:00:00 2001
+From: linzhuorong <linzhuorong@huawei.com>
+Date: Wed, 30 Nov 2022 15:36:14 +0800
+Subject: [PATCH] readelf: Handle DW_LLE_GNU_view_pair
+
+Signed-off-by: linzhuorong <linzhuorong@huawei.com>
+---
+ libdw/dwarf.h |  6 +++++-
+ src/readelf.c | 12 ++++++++++++
+ 2 files changed, 17 insertions(+), 1 deletion(-)
+
+diff --git a/libdw/dwarf.h b/libdw/dwarf.h
+index 19a4be9..e70269c 100644
+--- a/libdw/dwarf.h
++++ b/libdw/dwarf.h
+@@ -927,7 +927,11 @@ enum
+     DW_LLE_GNU_end_of_list_entry = 0x0,
+     DW_LLE_GNU_base_address_selection_entry = 0x1,
+     DW_LLE_GNU_start_end_entry = 0x2,
+-    DW_LLE_GNU_start_length_entry = 0x3
++    DW_LLE_GNU_start_length_entry = 0x3,
++
++    // http://www.fsfla.org/~lxoliva/papers/sfn/dwarf6-sfn-lvu.txt
++    // https://dwarfstd.org/ShowIssue.php?issue=170427.1
++    DW_LLE_GNU_view_pair = 0x9
+   };
+ 
+ 
+diff --git a/src/readelf.c b/src/readelf.c
+index 9b47262..c19b0a5 100644
+--- a/src/readelf.c
++++ b/src/readelf.c
+@@ -4120,6 +4120,8 @@ dwarf_loc_list_encoding_string (unsigned int kind)
+ #define DWARF_ONE_KNOWN_DW_LLE(NAME, CODE) case CODE: return #NAME;
+       DWARF_ALL_KNOWN_DW_LLE
+ #undef DWARF_ONE_KNOWN_DW_LLE
++    /* DW_LLE_GNU_view_pair is special/incompatible with default codes.  */
++    case DW_LLE_GNU_view_pair: return "GNU_view_pair";
+     default:
+       return NULL;
+     }
+@@ -9514,6 +9516,16 @@ print_debug_loclists_section (Dwfl_Module *dwflmod,
+ 	      readp += len;
+ 	      break;
+ 
++	    case DW_LLE_GNU_view_pair:
++	      if ((uint64_t) (nexthdr - readp) < 1)
++		goto invalid_entry;
++	      get_uleb128 (op1, readp, nexthdr);
++	      if ((uint64_t) (nexthdr - readp) < 1)
++		goto invalid_entry;
++	      get_uleb128 (op2, readp, nexthdr);
++	      printf (" %" PRIx64 ", %" PRIx64 "\n", op1, op2);
++	      break;
++
+ 	    default:
+ 	      goto invalid_entry;
+ 	    }
+-- 
+2.12.3
+
