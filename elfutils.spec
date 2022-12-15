@@ -1,7 +1,7 @@
 # -*- rpm-spec from http://elfutils.org/ -*-
 Name: elfutils
 Version: 0.180
-Release: 9
+Release: 13
 Summary: A collection of utilities and DSOs to handle ELF files and DWARF data
 URL: http://elfutils.org/
 License: GPLv3+ and (GPLv2+ or LGPLv3+)
@@ -18,7 +18,6 @@ Requires: glibc >= 2.7 libstdc++
 
 BuildRoot: %{_tmppath}/%{name}-root
 BuildRequires: gcc >= 4.1.2-33 m4 zlib-devel gdb-headless gcc-c++
-BuildRequires: bzip2-devel xz-devel xz-libs
 
 # For debuginfod
 BuildRequires: pkgconfig(libmicrohttpd) >= 0.9.33
@@ -302,6 +301,9 @@ exit 0
 %systemd_postun_with_restart debuginfod.service
 
 %changelog
+* Thu Dec 15 2022 zhangruifang <zhangruifang1@h-partners.com> - 0.180-13
+- revert commit "add some compression support"
+
 * Fri Sep 9 2022 fuanan <fuanan3@h-partners.com> - 0.180-9
 - Fix "/usr/lib64/libdebuginfod.so.1" not found when uninstall elfutils-debuginfod-client-devel
 - Fix Obsoletes in spec
