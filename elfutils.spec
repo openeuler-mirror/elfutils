@@ -1,7 +1,7 @@
 # -*- rpm-spec from http://elfutils.org/ -*-
 Name: elfutils
 Version: 0.187
-Release: 10
+Release: 11
 Summary: A collection of utilities and DSOs to handle ELF files and DWARF data
 URL: http://elfutils.org/
 License: GPLv3+ and (GPLv2+ or LGPLv3+)
@@ -12,6 +12,9 @@ Patch1: Fix-error-of-parsing-object-file-perms.patch
 Patch2: Fix-issue-of-moving-files-by-ar-or-br.patch
 Patch3: Get-instance-correctly-for-eu-ar-N-option.patch
 Patch4: elfutils-Add-sw64-architecture.patch
+Patch5: backport-PR29926-debuginfod-Fix-usage-of-deprecated-CURLINFO_.patch
+Patch6: backport-debuginfod-Define-CURL_AT_LEAST_VERSION-if-necessary.patch
+Patch7: backport-debuginfod-client-Use-CURLOPT_PROTOCOLS_STR-for-libc.patch
 
 Requires: elfutils-libelf = %{version}-%{release}
 Requires: elfutils-libs = %{version}-%{release}
@@ -177,6 +180,9 @@ such servers to download those files on demand.
 %ifarch sw_64
 %patch4 -p1
 %endif
+%patch5 -p1
+%patch6 -p1
+%patch7 -p1
 
 %build
 %configure --program-prefix=%{_programprefix}
@@ -326,6 +332,12 @@ exit 0
 %systemd_postun_with_restart debuginfod.service
 
 %changelog
+* Fri Mar 10 2023 yixiangzhike<yixiangzhike007@163.com> - 0.187-11
+- Type:bugfix
+- CVE:NA
+- SUG:NA
+- DESC:Fix failure of compiling with curl-7.88.1
+
 * Mon Nov 14 2022 wuzx<wuzx1226@qq.com> - 0.187-10
 - Type:feature
 - CVE:NA
