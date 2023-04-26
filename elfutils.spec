@@ -1,7 +1,7 @@
 # -*- rpm-spec from http://elfutils.org/ -*-
 Name: elfutils
 Version: 0.187
-Release: 11
+Release: 12
 Summary: A collection of utilities and DSOs to handle ELF files and DWARF data
 URL: http://elfutils.org/
 License: GPLv3+ and (GPLv2+ or LGPLv3+)
@@ -185,6 +185,11 @@ such servers to download those files on demand.
 %patch7 -p1
 
 %build
+%if "%toolchain" == "clang"
+  CFLAGS="$CFLAGS -Wno-error=gnu-variable-sized-type-not-at-end -Wno-error=unused-but-set-variable -Wno-error=unused-but-set-parameter"
+  CXXFLAGS="$CXXFLAGS -Wno-error=unused-const-variable"
+%endif
+
 %configure --program-prefix=%{_programprefix}
 %make_build
 
@@ -332,6 +337,12 @@ exit 0
 %systemd_postun_with_restart debuginfod.service
 
 %changelog
+* Tue Apr 25 2023 jammyjellyfish <jammyjellyfish255@outlook.com> - 0.187-12
+- Type:bugfix
+- CVE:NA
+- SUG:NA
+- DESC:Fix clang build error
+
 * Fri Mar 10 2023 yixiangzhike<yixiangzhike007@163.com> - 0.187-11
 - Type:bugfix
 - CVE:NA
